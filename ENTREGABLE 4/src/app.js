@@ -1,66 +1,53 @@
-import express from "express";
-import {engine} from "express-handlebars";
-import { __dirname } from "./utils.js";
-import path from "path";
-import {Server} from "socket.io";
-import { productsRouter } from "./routes/products.routes.js";
-import { cartsRouter } from "./routes/carts.routes.js";
-import { viewsRouter } from "./routes/views.routes.js";
+import express from "express"
+import { __dirname } from "./utils.js"
+import handlebars from "express-handlebars"
+import { Server } from "socket.io"
 
-const port = 8080;
-const app = express();
+import viewRouter from "./routes/view.router.js"
+import productRouter from "./routes/products.router.js"
+import cartRouter from "./routes/carts.router.js"
 
-//midlewares
-app.use(express.static(path.join(__dirname,"/public")));
+import ProductManager from "./controllers/productManager.js"
 
-//middlewares
-app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+const app = express()
+const PORT = 8080;
 
-// Guardar el servidor http en una variable
-const httpsServer = app.listen(port,()=>console.log(`Server esta funcionando en el puerto ${port}`));
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.static(__dirname + "/public"))
+//handlebars
+app.engine("handlebars", handlebars.engine())
+app.set("views", __dirname + "/views")
+app.set("view engine", "handlebars")
 
-//configuracion para utilizar handlebars
-//configuracion de handlebars
-app.engine('.hbs', engine({extname: '.hbs'}));
-app.set('view engine', '.hbs');
-app.set('views', path.join(__dirname,"/views"));
+//rutas
+app.use("/api", productRouter)
+app.use("/api", cartRouter)
+app.use("/", viewRouter)
 
-// Crear servidor de websocket
-const socketServer = new Server(httpsServer);
-let messages = [];
 
-// Crear el canal de comunicacion, detectar socket del cliente
-socketServer.on("connection", (socketConnected)=>{
-    console.log(`Nuevo cliente conectado  ${socketConnected.id}`);
-    // Capturar info del cliente
-    socketConnected.on("messageKey", (data)=>{
-        console.log(data);
-        messages.push({userId:socketConnected.id,message:data});
+const httpServer = app.listen(PORT, () => {
+    console.log("server up ")
+})
+
+const pmanager = new ProductManager(__dirname + "/database/products.json")
+const socketServer = new Server(httpServer)
+
+socketServer.on("connection", async (socket) => {
+    console.log("cliente conectado con id:", socket.id)
+    const products = await pmanager.getProducts({});
+    socket.emit('productos', products);
+
+    socket.on('addProduct', async data => {
+        await pmanager.addProduct(data);
+        const updatedProducts = await pmanager.getProducts({}); // Obtener la lista actualizada de productos
+        socket.emit('productosupdated', updatedProducts);
     });
 
-    
-
-    socketConnected.on("nuevoProducto", (nuevoProd)=>{
-        console.log(data);
-       // messages.push({userId:socketConnected.id,message:data});
-
-        // Enviar todos los mensajes a todos los clientes
-        socketServer.emit("nuevoProducto", data);
+    socket.on("deleteProduct", async (id) => {
+        console.log("ID del producto a eliminar:", id);
+        const deletedProduct = await pmanager.deleteProduct(id);
+        const updatedProducts = await pmanager.getProducts({});
+        socketServer.emit("productosupdated", updatedProducts);
     });
-});
-
-//routes
-app.use("/api/products", productsRouter);
-app.use("/api/carts", cartsRouter);
-app.use("/home",viewsRouter);
-
-///////////
-/*
-
-const ProductsFilePath = path.join(__dirname,"files","products.json");
-const ProductService = new ProductManager(ProductsFilePath);
-
-app.get("/home",)
-const productos = ProductService.getProducts();
-*/
+})
