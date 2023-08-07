@@ -1,7 +1,9 @@
 import express from "express"
+import { config } from "./config/config.js"
 import { __dirname } from "./utils.js"
 import handlebars from "express-handlebars"
 import { Server } from "socket.io"
+import { connectDB } from "./config/dbconnection.js"
 
 import viewRouter from "./routes/view.router.js"
 import productRouter from "./routes/products.router.js"
@@ -10,7 +12,7 @@ import cartRouter from "./routes/carts.router.js"
 import ProductManager from "./controllers/productManager.js"
 
 const app = express()
-const PORT = 8080;
+const PORT = config.server.port;
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -24,6 +26,8 @@ app.set("view engine", "handlebars")
 app.use("/api", productRouter)
 app.use("/api", cartRouter)
 app.use("/", viewRouter)
+
+connectDB()
 
 
 const httpServer = app.listen(PORT, () => {

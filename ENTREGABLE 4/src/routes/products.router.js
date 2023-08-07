@@ -1,6 +1,7 @@
 import { Router } from "express"
 import ProductManager from "../controllers/productManager.js"
 import { __dirname } from "../utils.js"
+import { ProductsMongo } from "../dao/managers/mongo/productsMongo.js"
 
 const manager = new ProductManager(__dirname + '/database/products.json')
 const router = Router()
