@@ -22,8 +22,8 @@ const PORT = config.server.port;
 const app = express();
 
 //middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // json en el body de una petición
+app.use(express.urlencoded({ extended: true })); // json si la petición viene de un formulario
 app.use(express.static(__dirname + "/public"));
 
 const httpServer = app.listen(PORT, () => {
@@ -66,6 +66,10 @@ socketChat(socketServer)
 //routes
 app.use(viewsRouter);
 app.use("/api/sessions", sessionsRouter);
+
+
+console.log(process.argv);
+
 
 
 
