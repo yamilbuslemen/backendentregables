@@ -19,8 +19,8 @@ import { chatModel } from "./dao/models/chat.model.js";
 
 import { productsRouter } from "./routes/products.routes.js";
 import { cartsRouter } from "./routes/carts.routes.js";
-
-
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { generateUser } from './utils/helpers.js'; 
 
 const PORT = config.server.port;
 const app = express();
@@ -64,6 +64,7 @@ app.use(viewsRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/sessions", sessionsRouter);
+app.use(errorHandler);
 
 //servidor de websocket
 const io = new Server(httpServer);
@@ -87,26 +88,15 @@ io.on("connection",(socket)=>{
     })
 });
 
+// Facker
+app.get("/api/users", (req,res)=>{
+    const cant = parseInt(req.query.cant) || 100;
+    let users = [];
+    for(let i=0;i<cant;i++){
+        const user = generateUser();
+        users.push(user);
+    }
+    res.json({status:"success", data:users});
+});
 
-
-
-
-
-
-/*
-//servidor de websocket
-const socketServer = new Server(httpServer)
-
-socketProducts(socketServer)
-socketChat(socketServer)
-
-//connectDB()
-
-//routes
-app.use(viewsRouter);
-app.use("/api/sessions", sessionsRouter);
-
-
-console.log(process.argv);
-*/
 
