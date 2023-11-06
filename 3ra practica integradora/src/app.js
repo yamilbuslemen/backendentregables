@@ -24,6 +24,9 @@ import { generateUser } from './utils/helpers.js';
 import { addLogger } from "./helpers/logger.js";
 
 import { usersRouter } from "./routes/users.routes.js";
+import { swaggerSpecs } from './config/swagger.config.js';
+import swaggerUI from "swagger-ui-express";
+
 
 const PORT = config.server.port;
 const app = express();
@@ -124,3 +127,5 @@ app.get("/operacionCompleja",(req,res)=>{
     res.send(`La suma es igual a ${sum}`);
 });
 
+//endpoint para acceder a la documentacion de la api
+app.use("/api/docs",swaggerUI.serve,swaggerUI.setup(swaggerSpecs));
