@@ -1,0 +1,42 @@
+* {
+    box-sizing: border-box; 
+  }
+  
+  /* This is for the store */
+  .store_card {
+    max-width: 550px;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .store_card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* This is for the chat */
+  .chat_heading {
+    font-size: 16px;
+    margin: 20px auto;
+    text-align: center;
+    line-height: 1.5; 
+  }
+  
+  #chat_form {
+    margin: 20px auto;
+    max-width: 320px;
+  }
+  
+  #chat_history {
+    max-width: 500px;
+    background-color: rgb(226, 255, 245);
+    margin: 0 auto;
+    padding: 10px;
+    border-radius: 2px;
+  }
+  
+  #chat_history > p {
+    margin: 5px;
+    background-color: rgb(240, 240, 240);
+    border-radius: 4px;
+    padding: 5px;
+    text-align: left;
+  }
